@@ -15,6 +15,7 @@ int typecheck_failed;
 int codegen_failed;
 int dup_message = 0;
 struct type* return_type;
+FILE* f;
 
 int main( int argc, char* argv[] ){
 	if( argc != 3 || ( strcmp( argv[1], "-print" ) && strcmp( argv[1], "-resolve" ) && strcmp(argv[1], "-typecheck" ) ) ){
@@ -62,6 +63,30 @@ int main( int argc, char* argv[] ){
 		if( typecheck_failed ){
 			return 1;
 		}
+	}
+
+	if( !strcmp( argv[1], "-codegen" ) ){
+		scope_init();
+		resolve_failed = 0;
+		resolve_print = 0;
+		typecheck_failed = 0;
+		codegen_failed = 0;
+		decl_resolve( parser_result );
+		if( resolve_failed ){
+			printf( "name resolution failed\n" );
+			return 1;
+		}
+		decl_typecheck( parser_result );
+		if( typecheck_failed ){
+			printf( "typecheck failed\n" );
+			return 1;
+		}
+		decl_codegen( parser_result );
+		if( codegen_failed ){
+			printf( "codegen failed\n" );
+			return 1;
+		}
+		printf( "codegen successful\n" );
 	}
 
 	return 0;

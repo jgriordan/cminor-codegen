@@ -77,3 +77,29 @@ void decl_typecheck( struct decl* d ){
 	}
 	decl_typecheck( d->next );
 }
+
+void decl_codegen( struct decl* d ){
+	if( !d ) return;
+	if( d->symbol && d->symbol->kind == SYMBOL_GLOBAL && d->type ){
+		switch( d->type->kind ){
+			case TYPE_BOOLEAN:
+			case TYPE_CHARACTER:
+			case TYPE_INTEGER:
+				fprintf( f, ".data\n.globl %s\n%s:\n", d->name, d->name );
+				if( d->value ){
+					if( d->type->kind == TYPE_BOOLEAN || d->type->kind == TYPE_INTEGER ){
+						fprintf( f, ".quad %d", d->value->literal_value );
+					} else {
+						fprintf( f, ".quad %c", d->value->literal_value );
+					}
+				} else {
+					fprintf( f, ".quad 0\n" );
+				}
+			case TYPE_STRING:
+			case TYPE_ARRAY:
+			case TYPE_FUNCTION:
+				break;
+		}
+	}
+	decl_codegen( d->next );
+}
