@@ -1,7 +1,9 @@
 // register.h
 // John Riordan
 
-int used[16] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+#include <stdio.h>
+
+int used[7] = {0,0,0,0,0,0,0};
 
 int register_alloc();
 void register_free(int r);

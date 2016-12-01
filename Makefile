@@ -1,6 +1,6 @@
 all: cminor
 
-cminor: main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o
+cminor: main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o register.o
 	gcc -Wall main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o -o cminor
 
 parser.tab.o: parser.tab.c
@@ -21,29 +21,32 @@ scanner.c: lex.yy.c
 lex.yy.c: scanner.flex
 	flex scanner.flex
 
-decl.o: decl.c
+decl.o: decl.c decl.h
 	gcc -Wall -c decl.c
 
-param_list.o: param_list.c
+param_list.o: param_list.c param_list.h
 	gcc -Wall -c param_list.c
 
-stmt.o: stmt.c
+stmt.o: stmt.c stmt.h
 	gcc -Wall -c stmt.c
 
-expr.o: expr.c
+expr.o: expr.c expr.h
 	gcc -Wall -c expr.c
 
-type.o: type.c
+type.o: type.c type.h
 	gcc -Wall -c type.c
 
-scope.o: scope.c
+scope.o: scope.c scope.h
 	gcc -Wall -c scope.c
 
-symbol.o: symbol.c
+symbol.o: symbol.c symbol.h
 	gcc -Wall -c symbol.c
 
-hashtable.o: hashtable.c
+hashtable.o: hashtable.c hash_table.h
 	gcc -Wall -c hashtable.c
 
+register.o: register.c register.h
+	gcc -Wall -c register.c
+
 clean:
-	rm -f parser.tab.* parser.output scanner.c *.o *.out cminor cflat
+	rm -f parser.tab.* parser.output scanner.c *.o *.out cminor
