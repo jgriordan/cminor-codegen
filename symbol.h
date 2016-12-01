@@ -4,6 +4,8 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+extern int codegen_failed;
+
 typedef enum {
 	SYMBOL_LOCAL,
 	SYMBOL_PARAM,
@@ -21,5 +23,6 @@ struct symbol {
 
 struct symbol* symbol_create( symbol_t kind, struct type* type, char* name );
 void symbol_print( struct symbol* s );
+char* symbol_code( struct symbol* s );
 
 #endif
