@@ -18,7 +18,9 @@ struct type* return_type;
 FILE* f;
 
 int main( int argc, char* argv[] ){
-	if( argc != 3 || ( strcmp( argv[1], "-print" ) && strcmp( argv[1], "-resolve" ) && strcmp(argv[1], "-typecheck" ) ) ){
+	char assemblyName[256];
+	int i;
+	if( argc != 3 || ( strcmp( argv[1], "-print" ) && strcmp( argv[1], "-resolve" ) && strcmp(argv[1], "-typecheck" ) && strcmp(argv[1], "-codegen" ) ) ){
 		printf( "usage: %s -print <filename>\n", argv[0] );
 		printf( "usage: %s -resolve <filename>\n", argv[0] );
 		printf( "usage: %s -typecheck <filename>\n", argv[0] );
@@ -66,6 +68,16 @@ int main( int argc, char* argv[] ){
 	}
 
 	if( !strcmp( argv[1], "-codegen" ) ){
+		for( i=0; i<strlen(argv[2]); i++ ){
+			if( argv[2][i] == '.' ){
+				break;
+			}
+			assemblyName[i] = argv[2][i];
+		}
+		assemblyName[i++] = '.';
+		assemblyName[i++] = 's';
+		assemblyName[i] = '\0';
+		f = fopen(assemblyName, "w");
 		scope_init();
 		resolve_failed = 0;
 		resolve_print = 0;
@@ -87,6 +99,7 @@ int main( int argc, char* argv[] ){
 			return 1;
 		}
 		printf( "codegen successful\n" );
+		fclose( f );
 	}
 
 	return 0;
