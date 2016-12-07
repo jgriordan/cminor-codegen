@@ -95,9 +95,22 @@ void decl_codegen( struct decl* d ){
 				} else {
 					fprintf( f, ".quad 0\n" );
 				}
+				break;
 			case TYPE_STRING:
+				if( d->value )
+					fprintf( f, ".data\n%s:\n.string \"%s\"\n", d->name, d->value->string_literal );
+				else
+					fprintf( f, ".data\n%s:\n.string \"\"\n", d->name );
+				break;
 			case TYPE_ARRAY:
+				break;
 			case TYPE_FUNCTION:
+				if( d->code ){
+					fprintf( f, ".text\n.globl %s\n%s:\n", d->name, d->name );
+					fprintf( f, "push %%rbp\nmov %%rsp, %%rbp\n" );
+					stmt_codegen( d->code );
+					fprintf( f, "movq $0, %%rax\nmovq %%rbp, %%rsp\npopq %%rbp\nret\n" );
+				}
 				break;
 		}
 	}

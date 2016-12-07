@@ -1,3 +1,6 @@
 // some declarations
 
 x:integer;
+main:function void() = {
+	print "fun";
+}
