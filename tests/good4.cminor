@@ -1,0 +1,45 @@
+main: function void() = {
+	low: integer = -2;
+	high: integer = 100;
+	high2: integer = high;
+	bT: boolean;
+	bF: boolean;
+
+	print low, ' ', high, ' ', high2, "\n";
+
+	bT = low < high;
+	bF = high < low;
+	print bT, ' ', bF, "\n";
+
+	if( low < high ){
+		print "less than ";
+	}
+	if( high < low ){ }
+	else{
+		print "is working\n";
+	}
+
+	if( high > low ){
+		print "greater than ";
+	}
+	if( low > high ){ }
+	else{
+		print "is working\n";
+	}
+
+	if( high >= high2 ){
+		print "greater than or equal to ";
+	}
+	if( low >= high ){ }
+	else{
+		print "is working\n";
+	}
+
+	if( high <= high2 ){
+		print "less than or equal to ";
+	}
+	if( high <= low ){ }
+	else{
+		print "is working\n";
+	}
+}
