@@ -548,6 +548,19 @@ struct type* expr_typecheck( struct expr* e ){
 	return result;
 }
 
+void expr_relevant_cmp( expr_t kind ){
+	switch( kind ){
+		case EXPR_LE: fprintf( f, "jle " ); break;
+		case EXPR_GE: fprintf( f, "jge " ); break;
+		case EXPR_LT: fprintf( f, "jl " ); break;
+		case EXPR_GT: fprintf( f, "jg " ); break;
+		default:
+			printf( "I've made a terrible mistake\n" );
+			codegen_fail();
+			break;
+	}
+}
+
 void expr_codegen( struct expr* e ){
 	int i;
 	if( !e ) return;
@@ -558,12 +571,31 @@ void expr_codegen( struct expr* e ){
 			e->reg = e->right->reg;
 			break;
 		case EXPR_OR:
+			break;
 		case EXPR_AND:
+			break;
 		case EXPR_LE:
 		case EXPR_GE:
 		case EXPR_LT:
 		case EXPR_GT:
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			fprintf( f, "cmpq %s, %s\n", register_name( e->right->reg ), register_name( e->left->reg ) );
+			e->reg = e->left->reg;
+			register_free( e->right->reg );
+			i = marker_get();
+			marker_increment();
+			marker_increment();
+			expr_relevant_cmp( e->kind );
+			fprintf( f, ".L%d\n", i );
+			fprintf( f, "movq $0, %s\n", register_name( e->reg ) );
+			fprintf( f, "jmp .L%d\n", i+1 );
+			marker_print( i );
+			fprintf( f, "movq $1, %s\n", register_name( e->reg ) );
+			marker_print( i+1 );
+			break;
 		case EXPR_EQ:
+			break;
 		case EXPR_NE:
 			break;
 		case EXPR_ADD:
