@@ -55,8 +55,8 @@ char* symbol_code( struct symbol* s ){
 					sprintf( str, "%%r9" );
 					break;
 				default:
-					printf( "too many parameters!\n" );
-					codegen_failed++;
+					printf( "Too many parameters in function %s!\n", s->name );
+					codegen_fail();
 					break;
 			}
 			break;

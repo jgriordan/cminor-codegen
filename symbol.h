@@ -4,7 +4,7 @@
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
-extern int codegen_failed;
+#include "misc.h"
 
 typedef enum {
 	SYMBOL_LOCAL,

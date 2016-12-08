@@ -147,11 +147,11 @@ void decl_codegen( struct decl* d ){
 				break;
 			case TYPE_ARRAY:
 				printf( "Local arrays unsupported!\n" );
-				codegen_failed++;
+				codegen_fail();
 				return;
 			case TYPE_FUNCTION:
 				printf( "Local functions unsupported!\n" );
-				codegen_failed++;
+				codegen_fail();
 				return;
 			default:
 				break;

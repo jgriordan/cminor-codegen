@@ -653,6 +653,9 @@ void expr_codegen( struct expr* e ){
 			fprintf( f, "leaq .L%d, %s\n", i, register_name( e->reg ) );
 			break;
 		case EXPR_ARRAY:
+			printf( "Arrays unsupported!\n" );
+			codegen_fail();
+			break;
 		case EXPR_INDEX:
 			if( e->right ){
 				printf( "Multi-dimensional arrays not supported!\n" );
@@ -667,6 +670,8 @@ void expr_codegen( struct expr* e ){
 			break;
 		case EXPR_AR_INIT:
 		case EXPR_LIST:
+			printf( "Should never reach here!\n" );
+			codegen_fail();
 			break;
 	}
 }

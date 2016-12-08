@@ -12,7 +12,6 @@ extern FILE* yyin;
 int resolve_failed;
 int resolve_print;
 int typecheck_failed;
-int codegen_failed;
 int dup_message = 0;
 struct type* return_type;
 FILE* f;
@@ -84,7 +83,6 @@ int main( int argc, char* argv[] ){
 		resolve_failed = 0;
 		resolve_print = 0;
 		typecheck_failed = 0;
-		codegen_failed = 0;
 		for( i=0; i<7; i++ )
 			used[i] = 0;
 		marker = 0;
@@ -99,10 +97,6 @@ int main( int argc, char* argv[] ){
 			return 1;
 		}
 		decl_codegen( parser_result );
-		if( codegen_failed ){
-			printf( "codegen failed\n" );
-			return 1;
-		}
 		printf( "codegen successful\n" );
 		fclose( f );
 	}
