@@ -113,6 +113,9 @@ void decl_codegen( struct decl* d ){
 					fprintf( f, "%s:\n", d->name );
 					fprintf( f, "push %%rbp\n" );
 					fprintf( f, "movq %%rsp, %%rbp\n" );
+					for( locals = 1; locals <= 6; locals ++ ){
+						fprintf( f, "pushq %s\n", param_reg( locals ) );
+					}
 					locals = stmt_count_locals( d->code );
 					fprintf( f, "subq $%d, %%rsp\n", 8*locals );
 					fprintf( f, "pushq %%rbx\n" );

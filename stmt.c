@@ -216,9 +216,11 @@ void stmt_codegen( struct stmt* s ){
 			stmt_codegen_print( e->right );
 			break;
 		case STMT_RETURN:
-			expr_codegen( s->expr );
-			fprintf( f, "movq %s, %%rax\n", register_name( s->expr->reg ) );
-			register_free( s->expr->reg );
+			if( s->expr ){
+				expr_codegen( s->expr );
+				fprintf( f, "movq %s, %%rax\n", register_name( s->expr->reg ) );
+				register_free( s->expr->reg );
+			}
 			postamble();
 			break;
 		case STMT_BLOCK:
@@ -254,11 +256,16 @@ void stmt_codegen_print( struct expr* e ){
 			fprintf( f, "leaq .L%d, %%rdi\n", i+1 );
 			marker_increment();
 			marker_print( i+3 );
-			fprintf( f, "movq $0, %%rax\ncall printf\n" );
+			fprintf( f, "movq $0, %%rax\n" );
+			before_fn_call();
+			fprintf( f, "call printf\n" );
+			after_fn_call();
 			break;
 		case TYPE_CHARACTER:
 			fprintf( f, "movq %s, %%rdi\n", register_name( e->reg ) );
+			before_fn_call();
 			fprintf( f, "call putchar\n" );
+			after_fn_call();
 			break;
 		case TYPE_INTEGER:
 			fprintf( f, "movq %s, %%rsi\n", register_name( e->reg ) );
@@ -270,12 +277,16 @@ void stmt_codegen_print( struct expr* e ){
 			fprintf( f, ".text\n" );
 			fprintf( f, "leaq .L%d, %%rdi\n", i );
 			fprintf( f, "movq $0, %%rax\n" );
+			before_fn_call();
 			fprintf( f, "call printf\n" );
+			after_fn_call();
 			break;
 		case TYPE_STRING:
 			fprintf( f, "movq %s, %%rdi\n", register_name( e->reg ) );
 			fprintf( f, "movq $0, %%rax\n" );
+			before_fn_call();
 			fprintf( f, "call printf\n" );
+			after_fn_call();
 			break;
 		default:
 			break;
@@ -285,6 +296,6 @@ void stmt_codegen_print( struct expr* e ){
 
 int stmt_count_locals( struct stmt* s ){
 	if( !s ) return 0;
-	if( s->kind == STMT_DECL ) return 1 + stmt_count_locals( s->next );
-	else return stmt_count_locals( s->next );
+	if( s->kind == STMT_DECL ) return 1 + stmt_count_locals( s->body ) + stmt_count_locals( s->else_body ) + stmt_count_locals( s->next );
+	else return stmt_count_locals( s->body ) + stmt_count_locals( s->else_body ) + stmt_count_locals( s->next );
 }

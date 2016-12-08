@@ -1,4 +1,4 @@
-// some declarations
+// a slightly more complex hello world
 
 main:function void() = {
 	print 5, " hello world ", true, '\n';

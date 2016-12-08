@@ -32,34 +32,14 @@ char* symbol_code( struct symbol* s ){
 			sprintf( str, s->name );
 			break;
 		case SYMBOL_LOCAL:
-			sprintf( str, "-%d(%%rbp)", s->which*8 );
+			sprintf( str, "-%d(%%rbp)", s->which*8 + 48 );
 			break;
 		case SYMBOL_PARAM:
-			switch( s->which ){
-				case 1:
-					sprintf( str, "%%rdi" );
-					break;
-				case 2:
-					sprintf( str, "%%rsi" );
-					break;
-				case 3:
-					sprintf( str, "%%rdx" );
-					break;
-				case 4:
-					sprintf( str, "%%rcx" );
-					break;
-				case 5:
-					sprintf( str, "%%r8" );
-					break;
-				case 6:
-					sprintf( str, "%%r9" );
-					break;
-				default:
-					printf( "Too many parameters in function %s!\n", s->name );
-					codegen_fail();
-					break;
+			if( s->which < 1 || s->which > 6 ){
+				printf( "Only up to 6 function parameters are allowed\n" );
+				codegen_fail();
 			}
-			break;
+			sprintf( str, "-%d(%%rbp)", s->which*8 );
 	}
 	return str;
 }

@@ -563,6 +563,7 @@ void expr_relevant_cmp( expr_t kind ){
 
 void expr_codegen( struct expr* e ){
 	int i;
+	struct type* t;
 	if( !e ) return;
 	switch( e->kind ){
 		case EXPR_ASGN:
@@ -571,8 +572,38 @@ void expr_codegen( struct expr* e ){
 			e->reg = e->right->reg;
 			break;
 		case EXPR_OR:
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			i = marker_get();
+			marker_increment();
+			marker_increment();
+			fprintf( f, "cmpq $0, %s\n", register_name( e->left->reg ) );
+			register_free( e->left->reg );
+			fprintf( f, "jne .L%d\n", i );
+			fprintf( f, "cmpq $0, %s\n", register_name( e->right->reg ) );
+			fprintf( f, "jne .L%d\n", i );
+			fprintf( f, "jmp .L%d\n", i+1 );
+			marker_print( i );
+			fprintf( f, "movq $1, %s\n", register_name( e->right->reg ) );
+			marker_print( i+1 );
+			e->reg = e->right->reg;
 			break;
 		case EXPR_AND:
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			i = marker_get();
+			marker_increment();
+			marker_increment();
+			fprintf( f, "cmpq $0, %s\n", register_name( e->left->reg ) );
+			register_free( e->left->reg );
+			fprintf( f, "je .L%d\n", i );
+			fprintf( f, "cmpq $0, %s\n", register_name( e->right->reg ) );
+			fprintf( f, "je .L%d\n", i );
+			fprintf( f, "jmp .L%d\n", i+1 );
+			marker_print( i );
+			fprintf( f, "movq $0, %s\n", register_name( e->right->reg ) );
+			marker_print( i+1 );
+			e->reg = e->right->reg;
 			break;
 		case EXPR_LE:
 		case EXPR_GE:
@@ -595,8 +626,41 @@ void expr_codegen( struct expr* e ){
 			marker_print( i+1 );
 			break;
 		case EXPR_EQ:
-			break;
 		case EXPR_NE:
+			t = expr_typecheck( e->left );
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			switch( t->kind ){
+				case TYPE_BOOLEAN:
+				case TYPE_CHARACTER:
+				case TYPE_INTEGER:
+					fprintf( f, "cmpq %s, %s\n", register_name( e->left->reg ), register_name( e->right->reg ) );
+					break;
+				case TYPE_STRING:
+					before_fn_call();
+					fprintf( f, "movq %s, %%rdi\n", register_name( e->left->reg ) );
+					fprintf( f, "movq %s, %%rsi\n", register_name( e->right->reg ) );
+					fprintf( f, "call strcmp\n" );
+					fprintf( f, "testq %%rax, %%rax\n" );
+					after_fn_call();
+					break;
+				default:
+					printf( "Typecheck should have already failed!\n" );
+					codegen_fail();
+					break;
+			}
+			register_free( e->left->reg );
+			i = marker_get();
+			marker_increment();
+			marker_increment();
+			if( e->kind == EXPR_EQ ) fprintf( f, "je .L%d\n", i );
+			else fprintf( f, "jne .L%d\n", i );
+			fprintf( f, "movq $0, %s\n", register_name( e->right->reg ) );
+			fprintf( f, "jmp .L%d\n", i+1 );
+			marker_print( i );
+			fprintf( f, "movq $1, %s\n", register_name( e->right->reg ) );
+			marker_print( i+1 );
+			e->reg = e->right->reg;
 			break;
 		case EXPR_ADD:
 			expr_codegen( e->left );
