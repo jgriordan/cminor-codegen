@@ -36,5 +36,7 @@ void stmt_print( struct stmt* s, int indent );
 void stmt_resolve( struct stmt* s );
 void stmt_typecheck( struct stmt* s );
 void stmt_codegen( struct stmt* s );
+void stmt_codegen_print( struct expr* e );
+int stmt_count_locals( struct stmt* s );
 
 #endif

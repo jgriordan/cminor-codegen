@@ -16,6 +16,8 @@ int codegen_failed;
 int dup_message = 0;
 struct type* return_type;
 FILE* f;
+int used[7];
+int marker;
 
 int main( int argc, char* argv[] ){
 	char assemblyName[256];
@@ -83,6 +85,9 @@ int main( int argc, char* argv[] ){
 		resolve_print = 0;
 		typecheck_failed = 0;
 		codegen_failed = 0;
+		for( i=0; i<7; i++ )
+			used[i] = 0;
+		marker = 0;
 		decl_resolve( parser_result );
 		if( resolve_failed ){
 			printf( "name resolution failed\n" );

@@ -12,6 +12,7 @@ struct expr* expr_create( expr_t kind, struct expr* left, struct expr* right ){
 	e->symbol = 0;
 	e->literal_value = 0;
 	e->string_literal = 0;
+	e->reg = 0;
 	return e;
 }
 
@@ -24,6 +25,7 @@ struct expr* expr_create_id( const char* n ){
 	e->symbol = 0;
 	e->literal_value = 0;
 	e->string_literal = 0;
+	e->reg = 0;
 	return e;
 }
 
@@ -36,6 +38,7 @@ struct expr* expr_create_boolean_literal( int c ){
 	e->symbol = 0;
 	e->literal_value = c;
 	e->string_literal = 0;
+	e->reg = 0;
 	return e;
 }
 
@@ -49,6 +52,7 @@ struct expr* expr_create_integer_literal( int c ){
 	e->symbol = 0;
 	e->literal_value = c;
 	e->string_literal = 0;
+	e->reg = 0;
 	return e;
 }
 
@@ -61,6 +65,7 @@ struct expr* expr_create_character_literal( int c ){
 	e->symbol = 0;
 	e->literal_value = c;
 	e->string_literal = 0;
+	e->reg = 0;
 	return e;
 }
 
@@ -73,6 +78,7 @@ struct expr* expr_create_string_literal( const char* str ){
 	e->symbol = 0;
 	e->literal_value = 0;
 	e->string_literal = str;
+	e->reg = 0;
 	return e;
 }
 
@@ -540,4 +546,28 @@ struct type* expr_typecheck( struct expr* e ){
 	type_delete( lt );
 	type_delete( rt );
 	return result;
+}
+
+void expr_codegen( struct expr* e ){
+	int i;
+	if( !e ) return;
+	switch( e->kind ){
+		case EXPR_CHARACTER_LITERAL:
+		case EXPR_INTEGER_LITERAL:
+		case EXPR_BOOLEAN_LITERAL:
+			e->reg = register_alloc();
+			fprintf( f, "movq $%d, %s\n", e->literal_value, register_name( e->reg ) );
+			break;
+		case EXPR_STRING_LITERAL:
+			e->reg = register_alloc();
+			fprintf( f, ".data\n" );
+			i = marker;
+			marker_print();
+			fprintf( f, ".string %s\n", e->string_literal );
+			fprintf( f, ".text\n" );
+			fprintf( f, "leaq .L%d, %s\n", i, register_name( e->reg ) );
+			break;
+		default:
+			break;
+	}
 }

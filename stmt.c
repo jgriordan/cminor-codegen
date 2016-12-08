@@ -162,5 +162,83 @@ void stmt_typecheck( struct stmt* s ){
 }
 
 void stmt_codegen( struct stmt* s ){
-	return;
+	struct expr* e;
+	if( !s ) return;
+	switch( s->kind ){
+		case STMT_DECL:
+		case STMT_EXPR:
+		case STMT_IF_ELSE:
+		case STMT_FOR:
+			break;
+		case STMT_PRINT:
+			e = s->expr;
+			if( !e ) return;
+			if( !e->right ) stmt_codegen_print( e );
+			while( e->right && e->right->kind == EXPR_LIST ){
+				stmt_codegen_print( e->left );
+				e = e->right;
+			}
+			stmt_codegen_print( e->left );
+			stmt_codegen_print( e->right );
+			break;
+		case STMT_RETURN:
+		case STMT_BLOCK:
+			break;
+	}
+	stmt_codegen( s->next );
+}
+
+void stmt_codegen_print( struct expr* e ){
+	struct type* t;
+	int i;
+	if( !e ) return;
+	expr_codegen( e );
+	t = expr_typecheck( e );
+	switch( t->kind ){
+		case TYPE_BOOLEAN:
+			i = marker;
+			fprintf( f, ".data\n" );
+			marker_print();
+			fprintf( f, ".string \"true\"\n" );
+			marker_print();
+			fprintf( f, ".string \"false\"\n.text\n" );
+			fprintf( f, "cmpq $0, %s\n", register_name( e->reg ) );
+			fprintf( f, "je .L%d\n", i+2 );
+			fprintf( f, "leaq .L%d, %%rdi\n", i );
+			fprintf( f, "jmp .L%d\n", i+3 );
+			marker_print();
+			fprintf( f, "leaq .L%d, %%rdi\n", i+1 );
+			marker_print();
+			fprintf( f, "movq $0, %%rax\ncall printf\n" );
+			break;
+		case TYPE_CHARACTER:
+			fprintf( f, "movq %s, %%rdi\n", register_name( e->reg ) );
+			fprintf( f, "call putchar\n" );
+			break;
+		case TYPE_INTEGER:
+			fprintf( f, "movq %s, %%rsi\n", register_name( e->reg ) );
+			fprintf( f, ".data\n" );
+			i = marker;
+			marker_print();
+			fprintf( f, ".string \"%%d\"\n" );
+			fprintf( f, ".text\n" );
+			fprintf( f, "leaq .L%d, %%rdi\n", i );
+			fprintf( f, "movq $0, %%rax\n" );
+			fprintf( f, "call printf\n" );
+			break;
+		case TYPE_STRING:
+			fprintf( f, "movq %s, %%rdi\n", register_name( e->reg ) );
+			fprintf( f, "movq $0, %%rax\n" );
+			fprintf( f, "call printf\n" );
+			break;
+		default:
+			break;
+	}
+	register_free( e->reg );
+}
+
+int stmt_count_locals( struct stmt* s ){
+	if( !s ) return 0;
+	if( s->kind == STMT_DECL ) return 1 + stmt_count_locals( s->next );
+	else return stmt_count_locals( s->next );
 }

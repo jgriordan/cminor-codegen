@@ -79,6 +79,7 @@ void decl_typecheck( struct decl* d ){
 }
 
 void decl_codegen( struct decl* d ){
+	int locals;
 	if( !d ) return;
 	if( d->symbol && d->symbol->kind == SYMBOL_GLOBAL && d->type ){
 		switch( d->type->kind ){
@@ -106,11 +107,61 @@ void decl_codegen( struct decl* d ){
 				break;
 			case TYPE_FUNCTION:
 				if( d->code ){
-					fprintf( f, ".text\n.globl %s\n%s:\n", d->name, d->name );
-					fprintf( f, "push %%rbp\nmov %%rsp, %%rbp\n" );
+					// preamble
+					fprintf( f, ".text\n" );
+					fprintf( f, ".globl %s\n", d->name );
+					fprintf( f, "%s:\n", d->name );
+					fprintf( f, "push %%rbp\n" );
+					fprintf( f, "movq %%rsp, %%rbp\n" );
+					locals = stmt_count_locals( d->code );
+					fprintf( f, "subq $%d, %%rsp\n", 8*locals );
+					fprintf( f, "pushq %%rbx\n" );
+					fprintf( f, "pushq %%r12\n" );
+					fprintf( f, "pushq %%r13\n" );
+					fprintf( f, "pushq %%r14\n" );
+					fprintf( f, "pushq %%r15\n" );
+
+					// function code
 					stmt_codegen( d->code );
-					fprintf( f, "movq $0, %%rax\nmovq %%rbp, %%rsp\npopq %%rbp\nret\n" );
+
+					// postamble
+					fprintf( f, "popq %%r15\n" );
+					fprintf( f, "popq %%r14\n" );
+					fprintf( f, "popq %%r13\n" );
+					fprintf( f, "popq %%r12\n" );
+					fprintf( f, "popq %%rbx\n" );
+					fprintf( f, "movq $0, %%rax\n" );
+					fprintf( f, "movq %%rbp, %%rsp\n" );
+					fprintf( f, "popq %%rbp\n" );
+					fprintf( f, "ret\n" );
 				}
+				break;
+			default:
+				break;
+		}
+	} else if( d->symbol && d->symbol->kind == SYMBOL_LOCAL && d->type ){
+		switch( d->type->kind ){
+			case TYPE_BOOLEAN:
+			case TYPE_CHARACTER:
+			case TYPE_INTEGER:
+			case TYPE_STRING:
+				if( d->value ){
+					expr_codegen( d->value );
+					fprintf( f, "movq %s, %s\n", register_name( d->value->reg ), symbol_code( d->symbol ) );
+					register_free( d->value->reg );
+				} else {
+					fprintf( f, "movq $0, %s\n", symbol_code( d->symbol ) );
+				}
+				break;
+			case TYPE_ARRAY:
+				printf( "Local arrays unsupported!\n" );
+				codegen_failed++;
+				return;
+			case TYPE_FUNCTION:
+				printf( "Local functions unsupported!\n" );
+				codegen_failed++;
+				return;
+			default:
 				break;
 		}
 	}

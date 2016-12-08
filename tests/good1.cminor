@@ -1,6 +1,5 @@
 // some declarations
 
-x:integer;
 main:function void() = {
-	print "fun";
+	print 5, " hello world ", true, '\n';
 }

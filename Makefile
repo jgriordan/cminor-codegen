@@ -1,7 +1,7 @@
 all: cminor
 
 cminor: main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o register.o
-	gcc -Wall main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o -o cminor
+	gcc -Wall main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o register.o -o cminor
 
 parser.tab.o: parser.tab.c
 	gcc -Wall -c parser.tab.c

@@ -3,11 +3,14 @@
 
 #include "scope.h"
 #include "param_list.h"
+#include "register.h"
 
 extern int resolve_failed;
 extern int resolve_print;
 extern int typecheck_failed;
 extern int dup_message;
+extern FILE* f;
+extern int marker;
 
 typedef enum {
 	EXPR_ASGN,
@@ -53,6 +56,7 @@ struct expr {
 	struct symbol *symbol;
 	int literal_value;
 	const char * string_literal;
+	int reg;
 };
 
 struct expr* expr_create( expr_t kind, struct expr* left, struct expr* right );
@@ -67,5 +71,6 @@ void expr_print( struct expr* e );
 int expr_list_equal_param_list( struct expr* e, struct param_list* p );
 void expr_resolve( struct expr* e );
 struct type* expr_typecheck( struct expr* e );
+void expr_codegen( struct expr* e );
 
 #endif
