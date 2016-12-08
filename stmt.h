@@ -5,6 +5,7 @@
 #define STMT_H
 
 #include "decl.h"
+#include "misc.h"
 
 extern struct type* return_type;
 

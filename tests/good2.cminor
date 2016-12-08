@@ -1,0 +1,6 @@
+c:char = 'c';
+main: function void() = {
+	s:string = "hello variables";
+	i: integer = 5 - 3;
+	print s, ' ', c, " ", i, '\n';
+}

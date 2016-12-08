@@ -4,13 +4,13 @@
 #include "scope.h"
 #include "param_list.h"
 #include "register.h"
+#include "misc.h"
 
 extern int resolve_failed;
 extern int resolve_print;
 extern int typecheck_failed;
 extern int dup_message;
 extern FILE* f;
-extern int marker;
 
 typedef enum {
 	EXPR_ASGN,

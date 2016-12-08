@@ -33,7 +33,3 @@ const char* register_name( int r ){
 	printf( "invalid register\n" );
 	return 0;
 }
-
-void marker_print(){
-	fprintf( f, ".L%d:\n", marker++ );
-}

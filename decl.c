@@ -88,11 +88,11 @@ void decl_codegen( struct decl* d ){
 			case TYPE_INTEGER:
 				fprintf( f, ".data\n.globl %s\n%s:\n", d->name, d->name );
 				if( d->value ){
-					if( d->type->kind == TYPE_BOOLEAN || d->type->kind == TYPE_INTEGER ){
-						fprintf( f, ".quad %d", d->value->literal_value );
-					} else {
-						fprintf( f, ".quad %c", d->value->literal_value );
-					}
+					//if( d->type->kind == TYPE_BOOLEAN || d->type->kind == TYPE_INTEGER ){
+						fprintf( f, ".quad %d\n", d->value->literal_value );
+					//} else {
+					//	fprintf( f, ".quad %c\n", d->value->literal_value );
+					//}
 				} else {
 					fprintf( f, ".quad 0\n" );
 				}
@@ -124,16 +124,8 @@ void decl_codegen( struct decl* d ){
 					// function code
 					stmt_codegen( d->code );
 
-					// postamble
-					fprintf( f, "popq %%r15\n" );
-					fprintf( f, "popq %%r14\n" );
-					fprintf( f, "popq %%r13\n" );
-					fprintf( f, "popq %%r12\n" );
-					fprintf( f, "popq %%rbx\n" );
 					fprintf( f, "movq $0, %%rax\n" );
-					fprintf( f, "movq %%rbp, %%rsp\n" );
-					fprintf( f, "popq %%rbp\n" );
-					fprintf( f, "ret\n" );
+					postamble();
 				}
 				break;
 			default:

@@ -102,12 +102,12 @@ void stmt_resolve( struct stmt* s ){
 	expr_resolve( s->init_expr );
 	expr_resolve( s->expr );
 	expr_resolve( s->next_expr );
-	scope_enter();
+	// scope_enter();
 	stmt_resolve( s->body );
-	scope_leave();
-	scope_enter();
+	// scope_leave();
+	// scope_enter();
 	stmt_resolve( s->else_body );
-	scope_leave();
+	// scope_leave();
 	stmt_resolve( s->next );
 }
 
@@ -163,12 +163,46 @@ void stmt_typecheck( struct stmt* s ){
 
 void stmt_codegen( struct stmt* s ){
 	struct expr* e;
+	int i;
 	if( !s ) return;
 	switch( s->kind ){
 		case STMT_DECL:
+			decl_codegen( s->decl );
+			break;
 		case STMT_EXPR:
+			expr_codegen( s->expr );
+			register_free( s->expr->reg );
+			break;
 		case STMT_IF_ELSE:
+			expr_codegen( s->expr );
+			fprintf( f, "cmpq $0, %s\n", register_name( s->expr->reg ) );
+			i = marker_get();
+			marker_increment();
+			marker_increment();
+			fprintf( f, "je .L%d\n", i );
+			stmt_codegen( s->body );
+			fprintf( f, "jmp .L%d\n", i+1 );
+			marker_print( i );
+			stmt_codegen( s->else_body );
+			marker_print( i+1 );
+			register_free( s->expr->reg );
+			break;
 		case STMT_FOR:
+			expr_codegen( s->init_expr );
+			register_free( s->init_expr->reg );
+			i = marker_get();
+			marker_increment();
+			marker_increment();
+			marker_print( i );
+			expr_codegen( s->expr );
+			fprintf( f, "cmpq $0, %s\n", register_name( s->expr->reg ) );
+			register_free( s->expr->reg );
+			fprintf( f, "je .L%d", i+1 );
+			stmt_codegen( s->body );
+			expr_codegen( s->next_expr );
+			register_free( s->next_expr->reg );
+			fprintf( f, "jmp .L%d\n", i );
+			marker_print( i+1 );
 			break;
 		case STMT_PRINT:
 			e = s->expr;
@@ -182,7 +216,13 @@ void stmt_codegen( struct stmt* s ){
 			stmt_codegen_print( e->right );
 			break;
 		case STMT_RETURN:
+			expr_codegen( s->expr );
+			fprintf( f, "movq %s, %%rax\n", register_name( s->expr->reg ) );
+			register_free( s->expr->reg );
+			postamble();
+			break;
 		case STMT_BLOCK:
+			stmt_codegen( s->body );
 			break;
 	}
 	stmt_codegen( s->next );
@@ -196,19 +236,24 @@ void stmt_codegen_print( struct expr* e ){
 	t = expr_typecheck( e );
 	switch( t->kind ){
 		case TYPE_BOOLEAN:
-			i = marker;
+			i = marker_get();
 			fprintf( f, ".data\n" );
-			marker_print();
+			marker_increment();
+			marker_print( i );
 			fprintf( f, ".string \"true\"\n" );
-			marker_print();
-			fprintf( f, ".string \"false\"\n.text\n" );
+			marker_increment();
+			marker_print( i+1 );
+			fprintf( f, ".string \"false\"\n" );
+			fprintf( f, ".text\n" );
 			fprintf( f, "cmpq $0, %s\n", register_name( e->reg ) );
 			fprintf( f, "je .L%d\n", i+2 );
 			fprintf( f, "leaq .L%d, %%rdi\n", i );
 			fprintf( f, "jmp .L%d\n", i+3 );
-			marker_print();
+			marker_increment();
+			marker_print( i+2 );
 			fprintf( f, "leaq .L%d, %%rdi\n", i+1 );
-			marker_print();
+			marker_increment();
+			marker_print( i+3 );
 			fprintf( f, "movq $0, %%rax\ncall printf\n" );
 			break;
 		case TYPE_CHARACTER:
@@ -218,8 +263,9 @@ void stmt_codegen_print( struct expr* e ){
 		case TYPE_INTEGER:
 			fprintf( f, "movq %s, %%rsi\n", register_name( e->reg ) );
 			fprintf( f, ".data\n" );
-			i = marker;
-			marker_print();
+			i = marker_get();
+			marker_increment();
+			marker_print( i );
 			fprintf( f, ".string \"%%d\"\n" );
 			fprintf( f, ".text\n" );
 			fprintf( f, "leaq .L%d, %%rdi\n", i );

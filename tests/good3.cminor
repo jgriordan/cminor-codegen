@@ -1,0 +1,16 @@
+c:char = 'c';
+main: function void() = {
+	s:string = " ";
+	i: integer = 5 - 3;
+	b: boolean = false;
+	print i, s;
+	i = i * 3;
+	print i, s, i/2, s, -i, s;
+	print b, s;
+	b = !b;
+	print b, s;
+	b = !b;
+	print b, s, !b, "\n";
+	j: integer = i++;
+	print j, s, i--, s, i, '\n';
+}

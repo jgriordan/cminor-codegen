@@ -552,6 +552,90 @@ void expr_codegen( struct expr* e ){
 	int i;
 	if( !e ) return;
 	switch( e->kind ){
+		case EXPR_ASGN:
+			expr_codegen( e->right );
+			fprintf( f, "movq %s, %s\n", register_name( e->right->reg ), symbol_code( e->left->symbol ) );
+			e->reg = e->right->reg;
+			break;
+		case EXPR_OR:
+		case EXPR_AND:
+		case EXPR_LE:
+		case EXPR_GE:
+		case EXPR_LT:
+		case EXPR_GT:
+		case EXPR_EQ:
+		case EXPR_NE:
+			break;
+		case EXPR_ADD:
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			fprintf( f, "addq %s, %s\n", register_name( e->left->reg ), register_name( e->right->reg ) );
+			register_free( e->left->reg );
+			e->reg = e->right->reg;
+			break;
+		case EXPR_SUB:
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			fprintf( f, "subq %s, %s\n", register_name( e->right->reg ), register_name( e->left->reg ) );
+			register_free( e->right->reg );
+			e->reg = e->left->reg;
+			break;
+		case EXPR_MUL:
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			fprintf( f, "pushq %%rdx\n" );
+			fprintf( f, "movq %s, %%rax\n", register_name( e->left->reg ) );
+			fprintf( f, "imulq %s\n", register_name( e->right->reg ) );
+			fprintf( f, "movq %%rax, %s\n", register_name( e->left->reg ) );
+			fprintf( f, "popq %%rdx\n" );
+			register_free( e->right->reg );
+			e->reg = e->left->reg;
+			break;
+		case EXPR_DIV:
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			fprintf( f, "pushq %%rdx\n" );
+			fprintf( f, "movq %s, %%rax\n", register_name( e->left->reg ) );
+			fprintf( f, "cqo\n" );
+			fprintf( f, "idivq %s\n", register_name( e->right->reg ) );
+			fprintf( f, "movq %%rax, %s\n", register_name( e->left->reg ) );
+			fprintf( f, "popq %%rdx\n" );
+			register_free( e->right->reg );
+			e->reg = e->left->reg;
+			break;
+		case EXPR_MOD:
+		case EXPR_EXP:
+			break;
+		case EXPR_NOT:
+			expr_codegen( e->right );
+			fprintf( f, "notq %s\n", register_name( e->right->reg ) );
+			e->reg = e->right->reg;
+			break;
+		case EXPR_NEG:
+			expr_codegen( e->right );
+			fprintf( f, "negq %s\n", register_name( e->right->reg ) );
+			e->reg = e->right->reg;
+			break;
+		case EXPR_INCREMENT:
+			expr_codegen( e->left );
+			e->reg = register_alloc();
+			fprintf( f, "movq %s, %s\n", register_name( e->left->reg ), register_name( e->reg ) );
+			fprintf( f, "addq $1, %s\n", register_name( e->left->reg ) );
+			fprintf( f, "movq %s, %s\n", register_name( e->left->reg ), symbol_code( e->left->symbol ) );
+			register_free( e->left->reg );
+			break;
+		case EXPR_DECREMENT:
+			expr_codegen( e->left );
+			e->reg = register_alloc();
+			fprintf( f, "movq %s, %s\n", register_name( e->left->reg ), register_name( e->reg ) );
+			fprintf( f, "subq $1, %s\n", register_name( e->left->reg ) );
+			fprintf( f, "movq %s, %s\n", register_name( e->left->reg ), symbol_code( e->left->symbol ) );
+			register_free( e->left->reg );
+			break;
+		case EXPR_ID:
+			e->reg = register_alloc();
+			fprintf( f, "movq %s, %s\n", symbol_code( e->symbol ), register_name( e->reg ) );
+			break;
 		case EXPR_CHARACTER_LITERAL:
 		case EXPR_INTEGER_LITERAL:
 		case EXPR_BOOLEAN_LITERAL:
@@ -561,13 +645,28 @@ void expr_codegen( struct expr* e ){
 		case EXPR_STRING_LITERAL:
 			e->reg = register_alloc();
 			fprintf( f, ".data\n" );
-			i = marker;
-			marker_print();
+			i = marker_get();
+			marker_increment();
+			marker_print( i );
 			fprintf( f, ".string %s\n", e->string_literal );
 			fprintf( f, ".text\n" );
 			fprintf( f, "leaq .L%d, %s\n", i, register_name( e->reg ) );
 			break;
-		default:
+		case EXPR_ARRAY:
+		case EXPR_INDEX:
+			if( e->right ){
+				printf( "Multi-dimensional arrays not supported!\n" );
+				codegen_fail();
+			}
+			break;	
+		case EXPR_CALL:
+			break;
+		case EXPR_PAREN:
+			expr_codegen( e->right );
+			e->reg = e->right->reg;
+			break;
+		case EXPR_AR_INIT:
+		case EXPR_LIST:
 			break;
 	}
 }

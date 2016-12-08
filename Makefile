@@ -1,7 +1,7 @@
 all: cminor
 
-cminor: main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o register.o
-	gcc -Wall main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o register.o -o cminor
+cminor: main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o register.o misc.o
+	gcc -Wall main.o parser.tab.o scanner.o decl.o param_list.o stmt.o expr.o type.o symbol.o scope.o hash_table.o register.o misc.o -o cminor
 
 parser.tab.o: parser.tab.c
 	gcc -Wall -c parser.tab.c
@@ -48,5 +48,8 @@ hashtable.o: hashtable.c hash_table.h
 register.o: register.c register.h
 	gcc -Wall -c register.c
 
+misc.o: misc.c misc.h
+	gcc -Wall -c misc.c
+
 clean:
-	rm -f parser.tab.* parser.output scanner.c *.o *.out cminor
+	rm -f parser.tab.* parser.output scanner.c *.o *.out tests/*.s cminor
