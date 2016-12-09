@@ -569,13 +569,14 @@ void expr_codegen( struct expr* e ){
 	if( !e ) return;
 	switch( e->kind ){
 		case EXPR_ASGN:
+			t = expr_typecheck( e->left );
+			if( t->kind == TYPE_ARRAY ){
+				printf( "Assigning entire array is unsupported!\n" );
+				codegen_fail();
+			}
 			expr_codegen( e->right );
 			if( e->left->kind == EXPR_ARRAY ){
 				e1 = e->left;
-				if( !e1->right || e1->right->kind != EXPR_INDEX ){
-					printf( "Assigning to entire array is unsupported!\n" );
-					codegen_fail();
-				}
 				expr_codegen( e1->right );
 				if( e1->left->symbol->kind != SYMBOL_GLOBAL ){
 					printf( "Only global arrays are supported!\n" );

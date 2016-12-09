@@ -298,6 +298,9 @@ void stmt_codegen_print( struct expr* e ){
 			fprintf( f, "call printf\n" );
 			after_fn_call();
 			break;
+		case TYPE_ARRAY:
+			printf( "Cannot print entire arrays, must print by index!\n" );
+			codegen_fail();
 		default:
 			break;
 	}
