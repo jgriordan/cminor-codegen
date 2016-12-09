@@ -98,7 +98,6 @@ int main( int argc, char* argv[] ){
 			return 1;
 		}
 		decl_codegen( parser_result );
-		printf( "codegen successful\n" );
 		fclose( f );
 	}
 

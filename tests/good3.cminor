@@ -1,3 +1,5 @@
+// assignments and operators testing
+
 c:char = 'c';
 main: function void() = {
 	s:string = " ";

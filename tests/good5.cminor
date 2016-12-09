@@ -1,5 +1,6 @@
 // good5.cminor
 // test if-else, and-or
+// also still hadn't looked at your examples
 
 main: function integer() = {
 	t: boolean = true;

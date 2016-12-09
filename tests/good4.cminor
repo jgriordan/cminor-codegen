@@ -1,3 +1,6 @@
+// test comparisons, note that I independently came up with this way of doing the prints
+// before looking at your examples
+
 main: function void() = {
 	low: integer = -2;
 	high: integer = 100;

@@ -1,5 +1,6 @@
-// good5.cminor
+// good6.cminor
 // test some equality
+// I did look by this point, so I changed my prints just to be different
 
 main: function integer() = {
 	s: string = "hello world";
