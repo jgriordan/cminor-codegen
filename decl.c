@@ -111,7 +111,7 @@ void decl_codegen( struct decl* d ){
 					fprintf( f, ".align 8\n" );
 					fprintf( f, ".size %s, %d\n", d->name, d->type->size->literal_value*8 );
 					fprintf( f, "%s:\n", d->name );
-					e = d->value->left;
+					if( d->value ) e = d->value->left;
 					for( locals = 0; locals < d->type->size->literal_value; locals ++ ){
 						if( d->value ){
 							if( e->kind == EXPR_INTEGER_LITERAL )

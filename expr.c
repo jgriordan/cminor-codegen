@@ -577,7 +577,7 @@ void expr_codegen( struct expr* e ){
 					codegen_fail();
 				}
 				expr_codegen( e1->right );
-				if( !e1->left->symbol->kind != SYMBOL_GLOBAL ){
+				if( e1->left->symbol->kind != SYMBOL_GLOBAL ){
 					printf( "Only global arrays are supported!\n" );
 					codegen_fail();
 				}
