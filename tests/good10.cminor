@@ -1,4 +1,4 @@
-// I tested everything I wanted to, so here's the first 20 digits of the fibonacci sequence in c-minor
+// here's the first 20 digits of the fibonacci sequence in c-minor iteratively
 
 i:integer;
 
