@@ -1,0 +1,27 @@
+// test some fun function calls and prints
+// this is pretty much my favorite test
+
+c:char = 'a';
+
+f2:function integer(d:boolean,s:string); // tricky, I know
+
+f1: function integer(d:char,s:string) = {
+	i:integer = 42;
+	print "hello world ", d, c == d, i % 12, "\n";
+	return f2( d != c, s );
+}
+
+f2: function integer(b:boolean,s:string) = {
+	s = "goodbye world ";
+	if( !b ){
+		print s, true, 'b', c, 17 / 3 < 4, "\n";
+		return -8675309;
+	}else
+		return -42;
+}
+
+main:function void() = {
+	s:string = " to watch the world burn\n";
+	print "some compilers just like", s;
+	print f1('a',s), s;
+}

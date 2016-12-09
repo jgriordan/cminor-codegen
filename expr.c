@@ -577,8 +577,16 @@ void expr_codegen( struct expr* e ){
 					codegen_fail();
 				}
 				expr_codegen( e1->right );
+				if( !e1->left->symbol->kind != SYMBOL_GLOBAL ){
+					printf( "Only global arrays are supported!\n" );
+					codegen_fail();
+				}
 				fprintf( f, "movq %s, %s(,%s,8)\n", register_name( e->right->reg ), symbol_code( e1->left->symbol ), register_name( e1->right->reg ) );
+				register_free( e1->right->reg );
 				e->reg = e->right->reg;
+			} else if( e->left->symbol->kind == SYMBOL_GLOBAL && e->left->symbol->type->kind == TYPE_STRING ){
+				printf( "Global strings must be constant!\n" );
+				codegen_fail();
 			} else {
 				fprintf( f, "movq %s, %s\n", register_name( e->right->reg ), symbol_code( e->left->symbol ) );
 				e->reg = e->right->reg;
@@ -808,6 +816,10 @@ void expr_codegen( struct expr* e ){
 		case EXPR_ARRAY:
 			expr_codegen( e->right );
 			e->reg = register_alloc();
+			if( e->left->symbol->kind != SYMBOL_GLOBAL ){
+				printf( "Only global arrays are supported!\n" );
+				codegen_fail();
+			}
 			fprintf( f, "movq %s(,%s,8), %s\n", symbol_code( e->left->symbol ), register_name( e->right->reg ), register_name( e->reg ) );
 			register_free( e->right->reg );
 			break;

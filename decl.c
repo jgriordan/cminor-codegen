@@ -80,6 +80,7 @@ void decl_typecheck( struct decl* d ){
 
 void decl_codegen( struct decl* d ){
 	int locals;
+	struct expr* e;
 	if( !d ) return;
 	if( d->symbol && d->symbol->kind == SYMBOL_GLOBAL && d->type ){
 		switch( d->type->kind ){
@@ -101,17 +102,26 @@ void decl_codegen( struct decl* d ){
 				break;
 			case TYPE_ARRAY:
 				if( d->type->subtype && d->type->subtype->kind == TYPE_INTEGER ){
+					if( d->type->size->literal_value <= 0 ){
+						printf( "Arrays must have size of at least 1!\n" );
+						codegen_fail();
+					}
 					fprintf( f, ".globl %s\n", d->name );
 					fprintf( f, ".data\n" );
 					fprintf( f, ".align 8\n" );
 					fprintf( f, ".size %s, %d\n", d->name, d->type->size->literal_value*8 );
 					fprintf( f, "%s:\n", d->name );
+					e = d->value->left;
 					for( locals = 0; locals < d->type->size->literal_value; locals ++ ){
 						if( d->value ){
-
-						} else {
+							if( e->kind == EXPR_INTEGER_LITERAL )
+								fprintf( f, ".quad %d\n", e->literal_value );
+							else {
+								fprintf( f, ".quad %d\n", e->left->literal_value );
+								e = e->right;
+							}
+						} else
 							fprintf( f, ".quad 0\n" );
-						}
 					}
 				} else {
 					printf( "Non-integer arrays unsupported\n" );
