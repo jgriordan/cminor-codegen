@@ -1,0 +1,58 @@
+// go up to the limit on params, plus add variables on every level
+
+a:char;
+
+tooCool4School: function void(b:char,c:char,d:char,e:char,f:char,g:char) = {
+	print a, ' ';
+	print b, ' ';
+	print c, ' ';
+	print d, ' ';
+	print e, ' ';
+	print f, ' ';
+	print g, ' ';
+	print 'h', ' ';
+	print "i ";
+	j:char = 'j';
+	k:char;
+	k = j;
+	print j, ' ';
+	if( true ){
+		k = 'k';
+		print k, " ";
+		l:char;
+		m:char = l;
+		l = 'l';
+		m = 'm';
+		n:char;
+		if( l != m )
+			n = 'n';
+		else
+			n = 'a';
+		print l, ' ', m, ' ', n, ' ';
+		int:integer = 1;
+		for(;int<=143;int=int+500){
+			o:char = 'o';
+			p:char = o;
+			print o, ' ';
+			if( "hello" == "hello" )
+				p = 'p';
+			print p, ' ', "q r s t u v w x ";
+			if( 42 / -6 < 10 ){
+				y:char = 'y';
+				z:char = 'z';
+				print y, " ";
+				bool: boolean = !(true || false);
+				if( bool )
+					print z;
+			}
+				
+		}
+	}
+}
+
+main: function integer() = {
+	a = 'a';
+	tooCool4School('b','c','d','e','f','g');
+	print "\n";
+	return 0;
+}

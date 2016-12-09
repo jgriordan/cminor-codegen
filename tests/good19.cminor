@@ -1,0 +1,18 @@
+// try some negative number computation for kicks and giggles
+// also, please don't torture the next class by having the = in a function declaration
+// I almost never remember it and end up with a parse error every time...
+
+func: function void(k:integer);
+i: integer;
+
+main: function integer() = {
+	i = -42;
+	j:integer = -6;
+	print i / j, '\n';
+	func(-2);
+	print "\n", i * j, '\n', i % j, "\n";
+}
+
+func: function void(k:integer) = {
+	print ( k ^ 3 );
+}

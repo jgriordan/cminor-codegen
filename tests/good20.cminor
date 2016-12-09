@@ -1,0 +1,14 @@
+// project euler problem 1, went the middle route of an ok solution to make up a little for the unoptimized compiler (or should I optimize the compiler?)
+
+main: function void() = {
+	i:integer;
+	sum:integer = 0;
+	for( i=3; i<1000; i=i+3 )
+		sum = sum + i;
+
+	for( i=5; i<1000; i=i+5 ){
+		if( i % 3 != 0 )
+			sum = sum+i;
+	}
+	print sum, "\n";
+}
