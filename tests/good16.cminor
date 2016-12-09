@@ -1,0 +1,11 @@
+// test calling functions with only prototypes
+
+puts: function integer ( s: string );
+exit: function void ( status: integer );
+
+main: function integer () = {
+	i: integer;
+	i = puts("hello world");
+	print i, '\n';
+	exit( i );
+}

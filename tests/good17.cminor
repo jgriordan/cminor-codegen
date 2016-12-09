@@ -1,0 +1,12 @@
+// since the fibonacci sequence appears to be hot, here's the first 45 of it in the dynamic programming version in c-minor
+
+fib: array [5] integer;
+/*
+main: function integer () = {
+	print 0, ':', '\t', fib[0] = 0, '\n', 1, ":\t", fib[1] = 1, "\n";
+	i:integer;
+	for( i=2; i<45; i++ ){
+		fib[i] = fib[i-1] + fib[i-2];
+		print i, ":\t", fib[i], '\n';
+	}
+}*/
