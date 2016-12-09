@@ -188,19 +188,25 @@ void stmt_codegen( struct stmt* s ){
 			register_free( s->expr->reg );
 			break;
 		case STMT_FOR:
-			expr_codegen( s->init_expr );
-			register_free( s->init_expr->reg );
+			if( s->init_expr ){
+				expr_codegen( s->init_expr );
+				register_free( s->init_expr->reg );
+			}
 			i = marker_get();
 			marker_increment();
 			marker_increment();
 			marker_print( i );
-			expr_codegen( s->expr );
-			fprintf( f, "cmpq $0, %s\n", register_name( s->expr->reg ) );
-			register_free( s->expr->reg );
-			fprintf( f, "je .L%d", i+1 );
+			if( s->expr ){
+				expr_codegen( s->expr );
+				fprintf( f, "cmpq $0, %s\n", register_name( s->expr->reg ) );
+				register_free( s->expr->reg );
+				fprintf( f, "je .L%d\n", i+1 );
+			}
 			stmt_codegen( s->body );
-			expr_codegen( s->next_expr );
-			register_free( s->next_expr->reg );
+			if( s->next_expr ){
+				expr_codegen( s->next_expr );
+				register_free( s->next_expr->reg );
+			}
 			fprintf( f, "jmp .L%d\n", i );
 			marker_print( i+1 );
 			break;
@@ -208,12 +214,16 @@ void stmt_codegen( struct stmt* s ){
 			e = s->expr;
 			if( !e ) return;
 			if( !e->right ) stmt_codegen_print( e );
-			while( e->right && e->right->kind == EXPR_LIST ){
+			while( e->right && e->right->kind == EXPR_LIST && e->kind != EXPR_CALL ){
 				stmt_codegen_print( e->left );
 				e = e->right;
 			}
-			stmt_codegen_print( e->left );
-			stmt_codegen_print( e->right );
+			if( e->kind == EXPR_CALL || e->kind == EXPR_ARRAY )
+				stmt_codegen_print( e );
+			else {
+				stmt_codegen_print( e->left );
+				stmt_codegen_print( e->right );
+			}
 			break;
 		case STMT_RETURN:
 			if( s->expr ){

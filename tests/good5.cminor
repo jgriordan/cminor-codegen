@@ -1,0 +1,40 @@
+// good5.cminor
+// test if-else, and-or
+
+main: function integer() = {
+	t: boolean = true;
+	f: boolean = false;
+
+	if( t && t )
+		print "should print\n";
+	else
+		print "should not print\n";
+	if( t && f )
+		print "should not print\n";
+	else
+		print "should print\n";
+	if( f && t )
+		print "should not print\n";
+	else
+		print "should print\n";
+	if( f && f )
+		print "should not print\n";
+	else
+		print "should print\n";
+	if( t || t )
+		print "should print\n";
+	else
+		print "should not print\n";
+	if( t || f )
+		print "should print\n";
+	else
+		print "should not print\n";
+	if( f || t )
+		print "should print\n";
+	else
+		print "should not print\n";
+	if( f || f )
+		print "should not print\n";
+	else
+		print "should print\n";
+}

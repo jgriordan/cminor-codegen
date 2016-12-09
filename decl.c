@@ -88,22 +88,35 @@ void decl_codegen( struct decl* d ){
 			case TYPE_INTEGER:
 				fprintf( f, ".data\n.globl %s\n%s:\n", d->name, d->name );
 				if( d->value ){
-					//if( d->type->kind == TYPE_BOOLEAN || d->type->kind == TYPE_INTEGER ){
-						fprintf( f, ".quad %d\n", d->value->literal_value );
-					//} else {
-					//	fprintf( f, ".quad %c\n", d->value->literal_value );
-					//}
+					fprintf( f, ".quad %d\n", d->value->literal_value );
 				} else {
 					fprintf( f, ".quad 0\n" );
 				}
 				break;
 			case TYPE_STRING:
 				if( d->value )
-					fprintf( f, ".data\n%s:\n.string \"%s\"\n", d->name, d->value->string_literal );
+					fprintf( f, ".data\n%s:\n.string %s\n", d->name, d->value->string_literal );
 				else
 					fprintf( f, ".data\n%s:\n.string \"\"\n", d->name );
 				break;
 			case TYPE_ARRAY:
+				if( d->type->subtype && d->type->subtype->kind == TYPE_INTEGER ){
+					fprintf( f, ".globl %s\n", d->name );
+					fprintf( f, ".data\n" );
+					fprintf( f, ".align 8\n" );
+					fprintf( f, ".size %s, %d\n", d->name, d->type->size->literal_value*8 );
+					fprintf( f, "%s:\n", d->name );
+					for( locals = 0; locals < d->type->size->literal_value; locals ++ ){
+						if( d->value ){
+
+						} else {
+							fprintf( f, ".quad 0\n" );
+						}
+					}
+				} else {
+					printf( "Non-integer arrays unsupported\n" );
+					codegen_fail();
+				}
 				break;
 			case TYPE_FUNCTION:
 				if( d->code ){

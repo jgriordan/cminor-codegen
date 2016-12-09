@@ -1,0 +1,17 @@
+// array fun-time
+
+a : array [5] integer;
+
+main: function integer() = {
+	i: integer = 10;
+	for( i=0; i<5; i++ ){
+		a[i] = i ^ 2;
+	}
+	for( i=0; i<5; i++ ){
+		print a[i];
+		if( i < 4 )
+			print ", ";
+	}
+	print '\n';
+	return 0;
+}

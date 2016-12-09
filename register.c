@@ -30,6 +30,6 @@ const char* register_name( int r ){
 		case 6:	return "%r14";
 		case 7:	return "%r15";
 	}
-	printf( "invalid register\n" );
+	printf( "invalid register %d\n", r );
 	return 0;
 }

@@ -1,0 +1,14 @@
+// have some fun recursion
+
+recurse: function boolean(i:integer) = {
+	if( i <= 0 )
+		return true;
+	print "this is recursion ", i, " to go.\n";
+	recurse( i-1 );
+}
+
+main:function void() = {
+	b:boolean = false;
+	b = recurse(10);
+	print b, '\n';
+}

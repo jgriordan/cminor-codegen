@@ -1,0 +1,27 @@
+// good5.cminor
+// test some equality
+
+main: function integer() = {
+	s: string = "hello world";
+	b: boolean = true;
+	c: char = 'a';
+	i: integer = 5;
+
+	if( s == "hello world" )
+		print "success\n";
+	else
+		print "failure\n";
+	if( false == b )
+		print "failure\n";
+	else
+		print "success\n";
+	if( 'c' != c )
+		print "success\n";
+	else
+		print "failure\n";
+	if( i != 5 )
+		print "faulure\n";
+	else
+		print "success\n";
+	
+}

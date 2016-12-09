@@ -1,0 +1,23 @@
+// test out all the math operators
+
+glblFour : integer;
+
+math: function boolean(four:integer) = {
+	six : integer;
+	six = 6;
+	print "ten: ", six + four, '\n';
+	print "two: ", six - four, '\n';
+	print "twenty-four: ", six * four, '\n';
+	print "one: ", six / four, '\n';
+	print "two: ", six % four, '\n';
+	print "sixty-four: ", four ^ (six % four + six / four), '\n';
+	return true;
+}
+
+main: function integer() = {
+	glblFour = 4;
+	if( math(glblFour) )
+		return 0;
+	else
+		return -1;
+}

@@ -1,0 +1,23 @@
+// test some more difficult function calls
+
+fint: function integer(c:char);
+fstring: function string(i:integer,b:boolean);
+
+main: function void() = {
+	i:integer = fint('b');
+	print fstring(i,true);
+}
+
+fint: function integer(c:char) = {
+	if( c == 'a' )
+		return 5;
+	else return -5;
+}
+
+fstring: function string(i:integer,b:boolean) = {
+	print i;
+	if( b )
+		return " function calls are working (I hope)!\n";
+	else
+		return " no fun\n";
+}

@@ -564,12 +564,25 @@ void expr_relevant_cmp( expr_t kind ){
 void expr_codegen( struct expr* e ){
 	int i;
 	struct type* t;
+	struct expr* e1;
+	struct expr* e2;
 	if( !e ) return;
 	switch( e->kind ){
 		case EXPR_ASGN:
 			expr_codegen( e->right );
-			fprintf( f, "movq %s, %s\n", register_name( e->right->reg ), symbol_code( e->left->symbol ) );
-			e->reg = e->right->reg;
+			if( e->left->kind == EXPR_ARRAY ){
+				e1 = e->left;
+				if( !e1->right || e1->right->kind != EXPR_INDEX ){
+					printf( "Assigning to entire array is unsupported!\n" );
+					codegen_fail();
+				}
+				expr_codegen( e1->right );
+				fprintf( f, "movq %s, %s(,%s,8)\n", register_name( e->right->reg ), symbol_code( e1->left->symbol ), register_name( e1->right->reg ) );
+				e->reg = e->right->reg;
+			} else {
+				fprintf( f, "movq %s, %s\n", register_name( e->right->reg ), symbol_code( e->left->symbol ) );
+				e->reg = e->right->reg;
+			}
 			break;
 		case EXPR_OR:
 			expr_codegen( e->left );
@@ -700,7 +713,46 @@ void expr_codegen( struct expr* e ){
 			e->reg = e->left->reg;
 			break;
 		case EXPR_MOD:
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			fprintf( f, "pushq %%rdx\n" );
+			fprintf( f, "movq %s, %%rax\n", register_name( e->left->reg ) );
+			fprintf( f, "cqo\n" );
+			fprintf( f, "idivq %s\n", register_name( e->right->reg ) );
+			fprintf( f, "movq %%rdx, %s\n", register_name( e->left->reg ) );
+			fprintf( f, "popq %%rdx\n" );
+			register_free( e->right->reg );
+			e->reg = e->left->reg;
+			break;
 		case EXPR_EXP:
+			expr_codegen( e->left );
+			expr_codegen( e->right );
+			fprintf( f, "pushq %%rdx\n" );
+			i = marker_get();
+			marker_increment();
+			marker_increment();
+			marker_increment();
+			marker_increment();
+			fprintf( f, "cmpq $0, %s\n", register_name( e->right->reg ) );
+			fprintf( f, "je .L%d\n", i+1 );
+			fprintf( f, "jl .L%d\n", i+2 );
+			fprintf( f, "movq %s, %%rax\n", register_name( e->left->reg ) );
+			marker_print( i );
+			fprintf( f, "subq $1, %s\n", register_name( e->right->reg ) );
+			fprintf( f, "cmpq $0, %s\n", register_name( e->right->reg ) );
+			fprintf( f, "je .L%d\n", i+3 );
+			fprintf( f, "imulq %s\n", register_name( e->left->reg ) );
+			fprintf( f, "jmp .L%d\n", i );
+			marker_print( i+1 );
+			fprintf( f, "movq $1, %%rax\n" );
+			fprintf( f, "jmp .L%d\n", i+3 );
+			marker_print( i+2 );
+			fprintf( f, "movq $0, %%rax\n" );
+			marker_print( i+3 );
+			fprintf( f, "movq %%rax, %s\n", register_name( e->left->reg ) );
+			fprintf( f, "popq %%rdx\n" );
+			register_free( e->right->reg );
+			e->reg = e->left->reg;
 			break;
 		case EXPR_NOT:
 			expr_codegen( e->right );
@@ -730,7 +782,12 @@ void expr_codegen( struct expr* e ){
 			break;
 		case EXPR_ID:
 			e->reg = register_alloc();
-			fprintf( f, "movq %s, %s\n", symbol_code( e->symbol ), register_name( e->reg ) );
+			if( e->symbol && e->symbol->kind == SYMBOL_GLOBAL && e->symbol->type && e->symbol->type->kind == TYPE_STRING ){
+				fprintf( f, "leaq %s, %s\n", symbol_code( e->symbol ), register_name( e->reg ) );
+			}
+			else {
+				fprintf( f, "movq %s, %s\n", symbol_code( e->symbol ), register_name( e->reg ) );
+			}
 			break;
 		case EXPR_CHARACTER_LITERAL:
 		case EXPR_INTEGER_LITERAL:
@@ -749,16 +806,42 @@ void expr_codegen( struct expr* e ){
 			fprintf( f, "leaq .L%d, %s\n", i, register_name( e->reg ) );
 			break;
 		case EXPR_ARRAY:
-			printf( "Arrays unsupported!\n" );
-			codegen_fail();
+			expr_codegen( e->right );
+			e->reg = register_alloc();
+			fprintf( f, "movq %s(,%s,8), %s\n", symbol_code( e->left->symbol ), register_name( e->right->reg ), register_name( e->reg ) );
+			register_free( e->right->reg );
 			break;
 		case EXPR_INDEX:
 			if( e->right ){
 				printf( "Multi-dimensional arrays not supported!\n" );
 				codegen_fail();
 			}
+			expr_codegen( e->left );
+			e->reg = e->left->reg;
 			break;	
 		case EXPR_CALL:
+			i = 1;
+			e1 = e->right;
+			while( e1 ){
+				if( i > 6 ){
+					printf( "Exceeded maximum of 6 function parameters\n" );
+					codegen_fail();
+				}
+				if( e1->left && e1->kind == EXPR_LIST )
+					e2 = e1->left;
+				else
+					e2 = e1;
+				expr_codegen( e2 );
+				fprintf( f, "movq %s, %s\n", register_name( e2->reg ), param_reg( i ) );
+				register_free( e2->reg );
+				e1 = e1->right;
+				i++;
+			}
+			before_fn_call();
+			fprintf( f, "call %s\n", e->left->name );
+			after_fn_call();
+			e->reg = register_alloc();
+			fprintf( f, "movq %%rax, %s\n", register_name( e->reg ) );
 			break;
 		case EXPR_PAREN:
 			expr_codegen( e->right );

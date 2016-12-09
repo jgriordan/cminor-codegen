@@ -1,0 +1,12 @@
+// good5.cminor
+// super easy function call
+
+f: function void() = {
+	print "another hello to the world\n";
+}
+
+main: function integer() = {
+	print "before fn call\n";
+	f();
+	print "after fn call\n";	
+}
